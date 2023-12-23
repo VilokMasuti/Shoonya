@@ -8,10 +8,10 @@ const Footer = () => {
       <div className=" flex-center wrapper flex-between flex flex-col gap-5 p-5 text-center sm:flex-row">
         <Link href="/">
           <Image
-            src="/assets/images/logo.svg"
-            alt="logo"
-            width={128}
-            height={38}
+            src="/png/logo-no-background.png"
+            width={150}
+            height={50}
+            alt="Evently logo"
           />
         </Link>
         <p> 2023 Shoonya. All Rights reserved.</p>

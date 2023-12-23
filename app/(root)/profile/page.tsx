@@ -1,74 +1,75 @@
-import { Button } from "@/components/ui/button";
-
 import Collection from "@/components/shared/Collection";
+import { Button } from "@/components/ui/button";
+import { getEventsByUser } from "@/lib/actions/event.action";
+import { getOrdersByUser } from "@/lib/actions/order.actions";
+import { IOrder } from "@/lib/database/models/order.model";
+import { SearchParamProps } from "@/types";
+import { auth } from "@clerk/nextjs";
 import Link from "next/link";
 import React from "react";
-import events from "events";
-import { auth } from "@clerk/nextjs";
-import { getEventsByUser } from "@/lib/actions/event.action";
 
-const Profilepage = async () => {
+const ProfilePage = async ({ searchParams }: SearchParamProps) => {
   const { sessionClaims } = auth();
   const userId = sessionClaims?.userId as string;
-  const OrganizedEvents = await getEventsByUser({ userId, page: 1 });
+
+  const ordersPage = Number(searchParams?.ordersPage) || 1;
+  const eventsPage = Number(searchParams?.eventsPage) || 1;
+
+  const orders = await getOrdersByUser({ userId, page: ordersPage });
+
+  const orderedEvents = orders?.data.map((order: IOrder) => order.event) || [];
+  const organizedEvents = await getEventsByUser({ userId, page: eventsPage });
+  console.log(orderedEvents);
 
   return (
     <>
-      {/* my ticktes */}
-      <section className=" bg-primary-50  bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
-        <div className=" wrapper flex items-center  justify-center sm:justify-between">
-          <h2 className=" h3-bold text-center sm:text-left underline">
-            My Tickets
-          </h2>
-          <Button
-            asChild
-            size="lg"
-            className=" underline-offset-4 button hidden sm:flex "
-          >
-            <Link href="/#events">Explore More Events..!</Link>
+      {/* My Tickets */}
+      <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
+        <div className="wrapper flex items-center justify-center sm:justify-between">
+          <h3 className="h3-bold text-center sm:text-left">My Tickets</h3>
+          <Button asChild size="lg" className="button hidden sm:flex">
+            <Link href="/#events">Explore More Events</Link>
           </Button>
         </div>
       </section>
-      {/* <section className=" wrapper my-8">
+
+      <section className="wrapper my-8">
         <Collection
-          data={events?.data}
-          emptyTitle="No tickets  purchsed yet"
-          emptyStateSubtext="No wOrRiEs - You many events to explore! In SHOONYA"
+          data={orderedEvents}
+          emptyTitle="No event tickets purchased yet"
+          emptyStateSubtext="No worries - plenty of exciting events to explore!"
           collectionType="My_Tickets"
-          limit={6}
-          page={1}
+          limit={3}
+          page={ordersPage}
           urlParamName="ordersPage"
-          totalPages={2}
+          totalPages={orders?.totalPages}
         />
-      </section> */}
-      <section className=" bg-primary-50  bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
-        <div className=" wrapper flex items-center  justify-center sm:justify-between">
-          <h2 className=" h3-bold text-center sm:text-left underline">
-            Events Organized
-          </h2>
-          <Button
-            asChild
-            size="lg"
-            className=" underline-offset-4 button hidden sm:flex "
-          >
-            <Link href="/events/crate">Create New Event </Link>
+      </section>
+
+      {/* Events Organized */}
+      <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
+        <div className="wrapper flex items-center justify-center sm:justify-between">
+          <h3 className="h3-bold text-center sm:text-left">Events Organized</h3>
+          <Button asChild size="lg" className="button hidden sm:flex">
+            <Link href="/events/create">Create New Event</Link>
           </Button>
         </div>
       </section>
-      <section className=" wrapper my-8">
+
+      <section className="wrapper my-8">
         <Collection
-          data={OrganizedEvents?.data}
-          emptyTitle="No  Events have been created yet"
-          emptyStateSubtext="No wOrRiEs - GO create some now  In SHOONYA"
+          data={organizedEvents?.data}
+          emptyTitle="No events have been created yet"
+          emptyStateSubtext="Go create some now"
           collectionType="Events_Organized"
-          limit={6}
-          page={1}
+          limit={3}
+          page={eventsPage}
           urlParamName="eventsPage"
-          totalPages={2}
+          totalPages={organizedEvents?.totalPages}
         />
       </section>
     </>
   );
 };
 
-export default Profilepage;
+export default ProfilePage;
